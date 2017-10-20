@@ -4,16 +4,19 @@
 #load data
 setwd('C:/Users/MB047320/OneDrive - Cerner Corporation/KUMC/projects/HPL Study/data')
 data <- read.csv('full_rx_time_data.csv')
+rx_boxplot <- read.csv('rx_barplot_sway_results.csv')
 
 #load libraries
 library(irr)
 library(ggplot2)
-
+library(pastecs) #statistical description of sample
+library(car) #ANOVA package
 ##############
 #descriptives#
 ##############
 summary(data)
 
+summary <-as.data.frame(stat.desc(data))
 
 #################
 ###   ICC     ###
@@ -54,6 +57,16 @@ icc_df <- cbind(ctip, sway)
 results_compare <- icc(ratings = icc_df, type = "consistency", unit = "average", model = "twoway") #0.732 ICC
 
 
+#########################################
+### One way repeated Measures ANOVA   ###
+### Pairwise comparisons              ###
+#########################################
+#for ANOVA, need long data format (i.e. columns = ID, Trial (1,2,3,4), result (ms))
+#use rx_boxplot for data (in correct format)
+rx_boxplot$sway_trial <- as.factor(rx_boxplot$sway_trial) #convert trial to factor for tx factor in ANOVA
+
+anova_res <- aov(results_ms ~ sway_trial, data = rx_boxplot) # comparisons between group means not significant (p = 0.262)
+summary(anova_res)
 ###############################
 ### Plots for Publications  ###
 ###############################
